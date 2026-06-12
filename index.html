@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VANTA — Interior Design Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #C9A84C;
+      --gold-light: #E8C97A;
+      --gold-dim: rgba(201,168,76,0.15);
+      --bg: #0A0A0A;
+      --surface: #111111;
+      --surface-2: #181818;
+      --border: rgba(255,255,255,0.07);
+      --text: #F5F5F5;
+      --muted: #888888;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    .serif { font-family: 'DM Serif Display', serif; }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.6;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, #A07830 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 40;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(10,10,10,0.0);
+      border-bottom: 1px solid transparent;
+      transition: background 0.4s, border-color 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(10,10,10,0.88);
+      border-bottom-color: var(--border);
+    }
+
+    .nav-link {
+      position: relative;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0; right: 0;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transition: transform 0.25s ease;
+    }
+    .nav-link:hover { color: #fff; }
+    .nav-link:hover::after { transform: scaleX(1); }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      color: #0A0A0A;
+      font-weight: 700;
+      font-size: 0.73rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.7rem 1.8rem;
+      border-radius: 2px;
+      transition: opacity 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-gold:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .btn-ghost {
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.73rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.7rem 1.8rem;
+      border-radius: 2px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ─── HERO SCROLL ANIMATION ─────────────────────── */
+    #hero-scroll-section {
+      position: relative;
+      /* 600vh gives ~5s of scroll travel at 120px/s */
+      height: 600vh;
+    }
+
+    #hero-sticky {
+      position: sticky;
+      top: 0;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #hero-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Dark vignette over canvas so text is readable */
+    #hero-sticky::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 70% at 50% 50%, rgba(10,10,10,0.15) 0%, rgba(10,10,10,0.72) 100%),
+        linear-gradient(to bottom, rgba(10,10,10,0.55) 0%, transparent 30%, transparent 70%, rgba(10,10,10,0.8) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    #hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 860px;
+      padding: 0 2rem;
+    }
+
+    /* Loading bar while frames preload */
+    #hero-loader {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold-light), var(--gold));
+      width: 0%;
+      z-index: 10;
+      transition: width 0.1s linear;
+    }
+
+    /* Scroll indicator */
+    #scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 1;
+      transition: opacity 0.5s;
+    }
+    #scroll-hint.hidden { opacity: 0; pointer-events: none; }
+    @keyframes bounce-arrow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+    #scroll-hint iconify-icon { animation: bounce-arrow 1.6s ease-in-out infinite; }
+
+    /* Frame counter HUD */
+    #frame-hud {
+      position: absolute;
+      bottom: 2.5rem;
+      right: 2.5rem;
+      z-index: 3;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.25);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ─── DIVIDER ───────────────────────────────────── */
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
+      margin: 0 auto;
+    }
+
+    /* ─── BENTO ─────────────────────────────────────── */
+    .bento {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2.5rem;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .bento:hover {
+      border-color: rgba(201,168,76,0.35);
+      transform: translateY(-3px);
+    }
+
+    .service-num {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1;
+      opacity: 0.07;
+    }
+
+    /* ─── TICKER ─────────────────────────────────────── */
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .ticker-inner {
+      display: flex;
+      gap: 3rem;
+      animation: ticker 30s linear infinite;
+      white-space: nowrap;
+    }
+
+    /* ─── WORK GRID ──────────────────────────────────── */
+    .work-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .work-item img { transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94); display: block; width: 100%; height: 100%; object-fit: cover; }
+    .work-item:hover img { transform: scale(1.05); }
+    .work-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.2) 50%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.4s;
+      display: flex;
+      align-items: flex-end;
+      padding: 1.75rem;
+    }
+    .work-item:hover .work-overlay { opacity: 1; }
+
+    /* ─── STATS ──────────────────────────────────────── */
+    .stat-num {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ─── TESTIMONIAL ───────────────────────────────── */
+    .testimonial-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2rem 2.5rem;
+    }
+
+    /* ─── CTA ────────────────────────────────────────── */
+    .cta-bg {
+      background: linear-gradient(135deg, #111 0%, #0f0e09 50%, #0A0A0A 100%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-bg::before {
+      content: '';
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(201,168,76,0.055) 0%, transparent 70%);
+      right: -150px; top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    /* ─── REVEAL ─────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.75s ease, transform 0.75s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── MOBILE MENU ────────────────────────────────── */
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════════ -->
+<nav id="main-nav">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="flex items-center justify-between h-16">
+      <a href="#" class="flex items-center gap-2">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="#C9A84C" stroke-width="1.5" fill="none"/>
+          <path d="M14 8L20 11V17L14 20L8 17V11L14 8Z" fill="#C9A84C" opacity="0.3"/>
+        </svg>
+        <span class="text-white font-bold tracking-[0.15em] text-sm uppercase">Vanta</span>
+      </a>
+
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#work"     class="nav-link">Work</a>
+        <a href="#services" class="nav-link">Services</a>
+        <a href="#process"  class="nav-link">Process</a>
+        <a href="#about"    class="nav-link">About</a>
+        <a href="#contact"  class="btn-gold text-xs">Start a Project</a>
+      </div>
+
+      <button id="menu-toggle" class="md:hidden" aria-label="Menu" style="color:rgba(255,255,255,0.7)">
+        <iconify-icon icon="lucide:menu" width="22"></iconify-icon>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="md:hidden border-t border-[var(--border)] bg-[var(--bg)]">
+    <div class="px-6 py-4 flex flex-col gap-4">
+      <a href="#work"     class="nav-link py-2">Work</a>
+      <a href="#services" class="nav-link py-2">Services</a>
+      <a href="#process"  class="nav-link py-2">Process</a>
+      <a href="#about"    class="nav-link py-2">About</a>
+      <a href="#contact"  class="btn-gold w-fit mt-2">Start a Project</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ════════════════════════════════════════
+     HERO — Scroll-driven canvas animation
+════════════════════════════════════════ -->
+<section id="hero-scroll-section">
+  <div id="hero-sticky">
+
+    <!-- Canvas: WebP frames rendered here -->
+    <canvas id="hero-canvas"></canvas>
+
+    <!-- Loading progress bar -->
+    <div id="hero-loader"></div>
+
+    <!-- Centred text content -->
+    <div id="hero-content">
+      <div class="inline-flex items-center gap-3 border border-white/10 rounded-full px-4 py-1.5 mb-8">
+        <span class="w-1.5 h-1.5 rounded-full bg-[var(--gold)] inline-block"></span>
+        <span class="text-[11px] text-white/50 tracking-[0.2em] uppercase">Est. 2017 · New York</span>
+      </div>
+
+      <h1 class="serif leading-[1.05] tracking-tight mb-6" style="font-size:clamp(2.8rem,7vw,6rem);">
+        Spaces that tell<br/>
+        <em class="gradient-text not-italic">your story.</em>
+      </h1>
+
+      <p class="text-white/50 leading-relaxed mx-auto mb-10" style="font-size:clamp(1rem,2vw,1.2rem);max-width:520px;">
+        We design interiors that balance beauty with intention — bespoke environments crafted for how you actually live.
+      </p>
+
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="#work" class="btn-gold">
+          View Our Work
+          <iconify-icon icon="lucide:arrow-right" width="14"></iconify-icon>
+        </a>
+        <a href="#contact" class="btn-ghost" style="border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.55);">Get in Touch</a>
+      </div>
+
+      <!-- Stat row -->
+      <div class="flex justify-center gap-10 mt-14 pt-8" style="border-top:1px solid rgba(255,255,255,0.08);">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-white">120+</div>
+          <div class="text-[10px] text-white/35 tracking-widest uppercase mt-0.5">Projects</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-white">08</div>
+          <div class="text-[10px] text-white/35 tracking-widest uppercase mt-0.5">Years</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-white">94%</div>
+          <div class="text-[10px] text-white/35 tracking-widest uppercase mt-0.5">Retained</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll hint -->
+    <div id="scroll-hint">
+      <span class="text-[10px] text-white/30 tracking-[0.2em] uppercase">Scroll</span>
+      <iconify-icon icon="lucide:chevron-down" width="16" style="color:rgba(255,255,255,0.3);"></iconify-icon>
+    </div>
+
+    <!-- Frame HUD -->
+    <div id="frame-hud">— / 120</div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     TICKER
+════════════════════════════════════════ -->
+<div class="py-8 border-y border-[var(--border)] overflow-hidden">
+  <div class="text-center mb-6">
+    <p class="text-[11px] text-[var(--muted)] tracking-[0.2em] uppercase">Trusted by discerning clients</p>
+  </div>
+  <div class="relative overflow-hidden">
+    <div class="ticker-inner">
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Park Avenue Residences</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">The Meridian Hotel</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Celeste Private Club</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Aurum Penthouse</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Halcyon Spa & Wellness</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Dusk Boutique Hotel</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Velour Members Club</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Pinnacle Sky Lounge</span>
+      <span class="text-[var(--gold)]">·</span>
+      <!-- Duplicate for seamless loop -->
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Park Avenue Residences</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">The Meridian Hotel</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Celeste Private Club</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Aurum Penthouse</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Halcyon Spa & Wellness</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Dusk Boutique Hotel</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Velour Members Club</span>
+      <span class="text-[var(--gold)]">·</span>
+      <span class="text-[var(--muted)] font-semibold text-xs tracking-widest opacity-40 hover:opacity-70 transition-opacity uppercase">Pinnacle Sky Lounge</span>
+      <span class="text-[var(--gold)]">·</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     WORK — Masonry grid (interior design)
+════════════════════════════════════════ -->
+<section id="work" class="py-28">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="flex justify-between items-end mb-16 reveal">
+      <div>
+        <div class="divider mb-4" style="margin:0 0 1rem 0;"></div>
+        <h2 class="serif text-4xl md:text-5xl leading-tight">Selected Work</h2>
+        <p class="text-[var(--muted)] mt-3 max-w-sm">Interiors designed with precision, built to endure.</p>
+      </div>
+      <a href="#" class="btn-ghost hidden md:inline-flex items-center gap-2">
+        All Projects
+        <iconify-icon icon="lucide:arrow-right" width="14"></iconify-icon>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 reveal">
+
+      <!-- Tall item -->
+      <div class="work-item lg:row-span-2" style="min-height:420px;">
+        <img
+          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=700&q=80"
+          alt="Aurum Penthouse — Living Room"
+          style="min-height:420px;"
+          loading="lazy"
+        />
+        <div class="work-overlay">
+          <div>
+            <div class="text-[11px] text-[var(--gold)] tracking-widest uppercase mb-1">Residential</div>
+            <div class="text-white font-semibold">Aurum Penthouse</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="work-item" style="height:290px;">
+        <img
+          src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=700&q=80"
+          alt="The Meridian Hotel — Suite"
+          loading="lazy"
+        />
+        <div class="work-overlay">
+          <div>
+            <div class="text-[11px] text-[var(--gold)] tracking-widest uppercase mb-1">Hospitality</div>
+            <div class="text-white font-semibold">Meridian Hotel Suite</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="work-item" style="height:290px;">
+        <img
+          src="https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=700&q=80"
+          alt="Celeste Private Club — Bedroom"
+          loading="lazy"
+        />
+        <div class="work-overlay">
+          <div>
+            <div class="text-[11px] text-[var(--gold)] tracking-widest uppercase mb-1">Hospitality</div>
+            <div class="text-white font-semibold">Celeste Private Club</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="work-item" style="height:290px;">
+        <img
+          src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=700&q=80"
+          alt="Park Avenue Kitchen"
+          loading="lazy"
+        />
+        <div class="work-overlay">
+          <div>
+            <div class="text-[11px] text-[var(--gold)] tracking-widest uppercase mb-1">Residential</div>
+            <div class="text-white font-semibold">Park Avenue Kitchen</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="work-item" style="height:290px;">
+        <img
+          src="https://images.unsplash.com/photo-1600210492493-0946911123ea?w=700&q=80"
+          alt="Dusk Boutique — Lobby"
+          loading="lazy"
+        />
+        <div class="work-overlay">
+          <div>
+            <div class="text-[11px] text-[var(--gold)] tracking-widest uppercase mb-1">Commercial</div>
+            <div class="text-white font-semibold">Dusk Boutique Lobby</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     SERVICES — Numbered list
+════════════════════════════════════════ -->
+<section id="services" class="py-28 border-t border-[var(--border)]">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="grid lg:grid-cols-2 gap-16 items-start">
+
+      <div class="lg:sticky lg:top-28 reveal">
+        <div class="divider mb-4" style="margin:0 0 1rem 0;"></div>
+        <h2 class="serif text-4xl md:text-5xl leading-tight mb-6">What We Do</h2>
+        <p class="text-[var(--muted)] leading-relaxed max-w-sm mb-8">
+          Every discipline we practice serves one goal: spaces that are impossible to forget.
+        </p>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bento py-5 text-center">
+            <div class="stat-num">120+</div>
+            <div class="text-xs text-[var(--muted)] uppercase tracking-widest mt-1">Projects</div>
+          </div>
+          <div class="bento py-5 text-center">
+            <div class="stat-num">8yrs</div>
+            <div class="text-xs text-[var(--muted)] uppercase tracking-widest mt-1">Experience</div>
+          </div>
+          <div class="bento py-5 text-center">
+            <div class="stat-num">18</div>
+            <div class="text-xs text-[var(--muted)] uppercase tracking-widest mt-1">Awards</div>
+          </div>
+          <div class="bento py-5 text-center">
+            <div class="stat-num">94%</div>
+            <div class="text-xs text-[var(--muted)] uppercase tracking-widest mt-1">Retention</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col reveal">
+
+        <div class="group border-b border-[var(--border)] py-8 cursor-pointer">
+          <div class="flex items-start justify-between gap-6">
+            <div class="flex gap-6">
+              <div class="service-num text-[var(--gold)]">01</div>
+              <div>
+                <h3 class="text-xl font-semibold mb-2 group-hover:text-[var(--gold)] transition-colors">Residential Design</h3>
+                <p class="text-[var(--muted)] text-sm leading-relaxed max-w-xs">Apartments, villas, and penthouses designed around how you live — not how a catalogue imagines you should.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Space Planning</span>
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Bespoke Furniture</span>
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Material Selection</span>
+                </div>
+              </div>
+            </div>
+            <iconify-icon icon="lucide:arrow-up-right" width="18" style="color:var(--muted);flex-shrink:0;margin-top:6px;"></iconify-icon>
+          </div>
+        </div>
+
+        <div class="group border-b border-[var(--border)] py-8 cursor-pointer">
+          <div class="flex items-start justify-between gap-6">
+            <div class="flex gap-6">
+              <div class="service-num text-[var(--gold)]">02</div>
+              <div>
+                <h3 class="text-xl font-semibold mb-2 group-hover:text-[var(--gold)] transition-colors">Hospitality & Commercial</h3>
+                <p class="text-[var(--muted)] text-sm leading-relaxed max-w-xs">Hotels, restaurants, clubs, and offices designed to make guests linger and clients convert.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">F&B Spaces</span>
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Hotel Suites</span>
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Flagship Retail</span>
+                </div>
+              </div>
+            </div>
+            <iconify-icon icon="lucide:arrow-up-right" width="18" style="color:var(--muted);flex-shrink:0;margin-top:6px;"></iconify-icon>
+          </div>
+        </div>
+
+        <div class="group border-b border-[var(--border)] py-8 cursor-pointer">
+          <div class="flex items-start justify-between gap-6">
+            <div class="flex gap-6">
+              <div class="service-num text-[var(--gold)]">03</div>
+              <div>
+                <h3 class="text-xl font-semibold mb-2 group-hover:text-[var(--gold)] transition-colors">Art & Object Curation</h3>
+                <p class="text-[var(--muted)] text-sm leading-relaxed max-w-xs">We source and commission artwork, sculptures, and decorative objects that transform rooms into collections.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Art Sourcing</span>
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Commissions</span>
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Styling</span>
+                </div>
+              </div>
+            </div>
+            <iconify-icon icon="lucide:arrow-up-right" width="18" style="color:var(--muted);flex-shrink:0;margin-top:6px;"></iconify-icon>
+          </div>
+        </div>
+
+        <div class="group py-8 cursor-pointer">
+          <div class="flex items-start justify-between gap-6">
+            <div class="flex gap-6">
+              <div class="service-num text-[var(--gold)]">04</div>
+              <div>
+                <h3 class="text-xl font-semibold mb-2 group-hover:text-[var(--gold)] transition-colors">Renovation & Project Management</h3>
+                <p class="text-[var(--muted)] text-sm leading-relaxed max-w-xs">Full-service oversight from demolition to the final styling walk-through. We manage every contractor, deadline, and detail.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Contractor Mgmt</span>
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Budget Control</span>
+                  <span class="text-[9px] border border-[var(--border)] rounded-full px-2 py-0.5 text-[var(--muted)] tracking-widest uppercase">Scheduling</span>
+                </div>
+              </div>
+            </div>
+            <iconify-icon icon="lucide:arrow-up-right" width="18" style="color:var(--muted);flex-shrink:0;margin-top:6px;"></iconify-icon>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     PROCESS — 4-step cards
+════════════════════════════════════════ -->
+<section id="process" class="py-28 border-t border-[var(--border)]" style="background:var(--surface);">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="text-center mb-16 reveal">
+      <div class="divider mb-4"></div>
+      <h2 class="serif text-4xl md:text-5xl leading-tight mb-4">How We Work</h2>
+      <p class="text-[var(--muted)] max-w-md mx-auto">A rigorous process refined over eight years. Clear milestones, zero guesswork.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 reveal">
+
+      <div class="bento" style="background:var(--bg);">
+        <div class="w-10 h-10 rounded-full border border-[var(--gold)] flex items-center justify-center mb-5">
+          <span class="text-xs font-bold text-[var(--gold)]">01</span>
+        </div>
+        <iconify-icon icon="lucide:search" width="20" style="color:var(--gold);margin-bottom:1rem;display:block;"></iconify-icon>
+        <h3 class="font-semibold text-base mb-2">Discovery</h3>
+        <p class="text-[var(--muted)] text-sm leading-relaxed">We immerse ourselves in how you live, work, and entertain. Every brief starts with listening.</p>
+      </div>
+
+      <div class="bento" style="background:var(--bg);">
+        <div class="w-10 h-10 rounded-full border border-[var(--gold)] flex items-center justify-center mb-5">
+          <span class="text-xs font-bold text-[var(--gold)]">02</span>
+        </div>
+        <iconify-icon icon="lucide:pen-tool" width="20" style="color:var(--gold);margin-bottom:1rem;display:block;"></iconify-icon>
+        <h3 class="font-semibold text-base mb-2">Concept</h3>
+        <p class="text-[var(--muted)] text-sm leading-relaxed">Three distinct design directions, each with mood boards, material palettes, and spatial layouts.</p>
+      </div>
+
+      <div class="bento" style="background:var(--bg);">
+        <div class="w-10 h-10 rounded-full border border-[var(--gold)] flex items-center justify-center mb-5">
+          <span class="text-xs font-bold text-[var(--gold)]">03</span>
+        </div>
+        <iconify-icon icon="lucide:layers" width="20" style="color:var(--gold);margin-bottom:1rem;display:block;"></iconify-icon>
+        <h3 class="font-semibold text-base mb-2">Design</h3>
+        <p class="text-[var(--muted)] text-sm leading-relaxed">Technical drawings, 3D renders, custom furniture specs, and complete material schedules.</p>
+      </div>
+
+      <div class="bento" style="background:var(--bg);">
+        <div class="w-10 h-10 rounded-full border border-[var(--gold)] flex items-center justify-center mb-5">
+          <span class="text-xs font-bold text-[var(--gold)]">04</span>
+        </div>
+        <iconify-icon icon="lucide:home" width="20" style="color:var(--gold);margin-bottom:1rem;display:block;"></iconify-icon>
+        <h3 class="font-semibold text-base mb-2">Delivery</h3>
+        <p class="text-[var(--muted)] text-sm leading-relaxed">On-site supervision through to the final styling walk-through. We don't leave until it's right.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     ABOUT — Zig-zag
+════════════════════════════════════════ -->
+<section id="about" class="py-28 border-t border-[var(--border)]">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="grid lg:grid-cols-2 gap-16 items-center mb-24 reveal">
+      <div>
+        <div class="divider mb-4" style="margin:0 0 1rem 0;"></div>
+        <h2 class="serif text-4xl md:text-5xl leading-tight mb-6">
+          We believe the best interiors are never finished — they evolve.
+        </h2>
+        <p class="text-[var(--muted)] leading-relaxed mb-4">
+          Founded in 2017 in New York, VANTA was built on a conviction that interior design should begin with the person, not the trend. Our team of eight senior designers has worked on residences, hotels, and private clubs across four continents.
+        </p>
+        <p class="text-[var(--muted)] leading-relaxed mb-8">
+          We don't take on more than four projects at a time. That's not a constraint — it's our quality guarantee.
+        </p>
+        <a href="#contact" class="btn-gold">
+          Meet the Team
+          <iconify-icon icon="lucide:arrow-right" width="14"></iconify-icon>
+        </a>
+      </div>
+      <div class="relative">
+        <img
+          src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80"
+          alt="VANTA studio workspace"
+          class="w-full h-80 object-cover rounded-sm border border-[var(--border)]"
+          loading="lazy"
+        />
+        <div class="absolute -bottom-5 -right-5 bento py-4 px-5 text-sm hidden md:block">
+          <div class="text-2xl font-bold text-white">8</div>
+          <div class="text-xs text-[var(--muted)] uppercase tracking-widest">Senior Designers</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-16 items-center reveal">
+      <div class="order-2 lg:order-1">
+        <img
+          src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80"
+          alt="Interior design in progress"
+          class="w-full h-80 object-cover rounded-sm border border-[var(--border)]"
+          loading="lazy"
+        />
+      </div>
+      <div class="order-1 lg:order-2">
+        <h3 class="serif text-3xl md:text-4xl leading-tight mb-6">Built on restraint, not excess.</h3>
+        <p class="text-[var(--muted)] leading-relaxed mb-4">
+          Luxury isn't about adding more — it's about removing everything that doesn't belong. Our interiors start with subtractive thinking: what does this space really need to feel complete?
+        </p>
+        <div class="flex flex-col gap-3 mt-6">
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="lucide:check" width="16" style="color:var(--gold);flex-shrink:0;"></iconify-icon>
+            <span class="text-sm text-[var(--muted)]">Senior-led from concept to completion</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="lucide:check" width="16" style="color:var(--gold);flex-shrink:0;"></iconify-icon>
+            <span class="text-sm text-[var(--muted)]">Maximum 4 active projects at once</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="lucide:check" width="16" style="color:var(--gold);flex-shrink:0;"></iconify-icon>
+            <span class="text-sm text-[var(--muted)]">Direct communication — no account managers</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <iconify-icon icon="lucide:check" width="16" style="color:var(--gold);flex-shrink:0;"></iconify-icon>
+            <span class="text-sm text-[var(--muted)]">On-site supervision through delivery</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     TESTIMONIALS
+════════════════════════════════════════ -->
+<section class="py-28 border-t border-[var(--border)]" style="background:var(--surface);">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="text-center mb-16 reveal">
+      <div class="divider mb-4"></div>
+      <h2 class="serif text-4xl md:text-5xl leading-tight mb-4">What Clients Say</h2>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 reveal">
+
+      <div class="testimonial-card">
+        <div class="flex gap-0.5 mb-4">
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+        </div>
+        <p class="text-sm leading-relaxed mb-6 text-white/75">"VANTA transformed our penthouse into something I'd only seen in magazines. They listened deeply and delivered beyond what we imagined."</p>
+        <div class="flex items-center gap-3">
+          <img src="https://i.pravatar.cc/40?img=11" alt="Marcus Reed" class="w-9 h-9 rounded-full object-cover" loading="lazy" />
+          <div>
+            <div class="text-sm font-semibold">Marcus Reed</div>
+            <div class="text-xs text-[var(--muted)]">Aurum Penthouse</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card" style="background:linear-gradient(135deg,rgba(201,168,76,0.07),rgba(201,168,76,0.02));border-color:rgba(201,168,76,0.18);">
+        <div class="text-[var(--gold)] text-4xl serif leading-none mb-4">"</div>
+        <p class="text-sm leading-relaxed mb-6 text-white/75">"The attention to material and proportion was extraordinary. Every room has a silence to it — you walk in and immediately feel at ease."</p>
+        <div class="flex items-center gap-3">
+          <img src="https://i.pravatar.cc/40?img=5" alt="Sophia Laurent" class="w-9 h-9 rounded-full object-cover" loading="lazy" />
+          <div>
+            <div class="text-sm font-semibold">Sophia Laurent</div>
+            <div class="text-xs text-[var(--muted)]">Celeste Private Club</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="flex gap-0.5 mb-4">
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+        </div>
+        <p class="text-sm leading-relaxed mb-6 text-white/75">"Our hotel's occupancy rate climbed 18% the quarter after the redesign. Guests specifically mention the interiors in reviews."</p>
+        <div class="flex items-center gap-3">
+          <img src="https://i.pravatar.cc/40?img=32" alt="Elijah Moss" class="w-9 h-9 rounded-full object-cover" loading="lazy" />
+          <div>
+            <div class="text-sm font-semibold">Elijah Moss</div>
+            <div class="text-xs text-[var(--muted)]">The Meridian Hotel</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card md:col-span-2">
+        <div class="text-[var(--gold)] text-4xl serif leading-none mb-4">"</div>
+        <p class="text-base leading-relaxed mb-6 text-white/75">"I've commissioned four different design firms over the years. VANTA is the only one that pushed back when I was wrong — and they were right every time. The process is collaborative, rigorous, and completely worth it."</p>
+        <div class="flex items-center gap-3">
+          <img src="https://i.pravatar.cc/40?img=49" alt="James Whitfield" class="w-9 h-9 rounded-full object-cover" loading="lazy" />
+          <div>
+            <div class="text-sm font-semibold">James Whitfield</div>
+            <div class="text-xs text-[var(--muted)]">Park Avenue Residences</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="flex gap-0.5 mb-4">
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+          <iconify-icon icon="lucide:star" width="13" style="color:var(--gold);"></iconify-icon>
+        </div>
+        <p class="text-sm leading-relaxed mb-6 text-white/75">"Clean process, zero surprises, stunning outcome. We've extended the engagement twice now."</p>
+        <div class="flex items-center gap-3">
+          <img src="https://i.pravatar.cc/40?img=23" alt="Nadia Chen" class="w-9 h-9 rounded-full object-cover" loading="lazy" />
+          <div>
+            <div class="text-sm font-semibold">Nadia Chen</div>
+            <div class="text-xs text-[var(--muted)]">Halcyon Spa & Wellness</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     CTA
+════════════════════════════════════════ -->
+<section id="contact" class="cta-bg py-32">
+  <div class="max-w-3xl mx-auto px-6 lg:px-10 text-center relative">
+    <div class="divider mb-8"></div>
+    <h2 class="serif leading-tight mb-6 reveal" style="font-size:clamp(2.2rem,5vw,4rem);">
+      Ready to transform<br/>
+      <em class="gradient-text not-italic">your space?</em>
+    </h2>
+    <p class="text-[var(--muted)] text-lg leading-relaxed max-w-xl mx-auto mb-10 reveal">
+      We accept a limited number of projects each quarter. If you have something ambitious in mind, let's talk.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12 reveal">
+      <a href="mailto:hello@vantastudio.com" class="btn-gold text-sm py-4 px-8">
+        <iconify-icon icon="lucide:mail" width="16"></iconify-icon>
+        hello@vantastudio.com
+      </a>
+      <a href="#" class="btn-ghost text-sm py-4 px-8">Book a 30-min Call</a>
+    </div>
+
+    <div class="flex flex-wrap gap-6 justify-center reveal">
+      <div class="flex items-center gap-2 text-xs text-[var(--muted)]">
+        <iconify-icon icon="lucide:shield-check" width="14" style="color:var(--gold);"></iconify-icon>
+        NDA on request
+      </div>
+      <div class="flex items-center gap-2 text-xs text-[var(--muted)]">
+        <iconify-icon icon="lucide:clock" width="14" style="color:var(--gold);"></iconify-icon>
+        48h response
+      </div>
+      <div class="flex items-center gap-2 text-xs text-[var(--muted)]">
+        <iconify-icon icon="lucide:calendar" width="14" style="color:var(--gold);"></iconify-icon>
+        Q3 2026 bookings open
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════ -->
+<footer class="border-t border-[var(--border)] py-12">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+      <div class="col-span-2 md:col-span-1">
+        <div class="flex items-center gap-2 mb-4">
+          <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="#C9A84C" stroke-width="1.5" fill="none"/>
+            <path d="M14 8L20 11V17L14 20L8 17V11L14 8Z" fill="#C9A84C" opacity="0.3"/>
+          </svg>
+          <span class="text-white font-bold tracking-[0.15em] text-sm uppercase">Vanta</span>
+        </div>
+        <p class="text-xs text-[var(--muted)] leading-relaxed max-w-[180px]">Premium interior design studio. New York, est. 2017.</p>
+      </div>
+
+      <div>
+        <div class="text-xs text-[var(--muted)] tracking-widest uppercase mb-4">Work</div>
+        <ul class="flex flex-col gap-2">
+          <li><a href="#" class="text-sm text-[var(--muted)] hover:text-white transition-colors">Residential</a></li>
+          <li><a href="#" class="text-sm text-[var(--muted)] hover:text-white transition-colors">Hospitality</a></li>
+          <li><a href="#" class="text-sm text-[var(--muted)] hover:text-white transition-colors">Commercial</a></li>
+          <li><a href="#" class="text-sm text-[var(--muted)] hover:text-white transition-colors">Art Curation</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="text-xs text-[var(--muted)] tracking-widest uppercase mb-4">Company</div>
+        <ul class="flex flex-col gap-2">
+          <li><a href="#about"   class="text-sm text-[var(--muted)] hover:text-white transition-colors">About</a></li>
+          <li><a href="#process" class="text-sm text-[var(--muted)] hover:text-white transition-colors">Process</a></li>
+          <li><a href="#"        class="text-sm text-[var(--muted)] hover:text-white transition-colors">Careers</a></li>
+          <li><a href="#contact" class="text-sm text-[var(--muted)] hover:text-white transition-colors">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="text-xs text-[var(--muted)] tracking-widest uppercase mb-4">Follow</div>
+        <ul class="flex flex-col gap-2">
+          <li><a href="#" class="flex items-center gap-2 text-sm text-[var(--muted)] hover:text-white transition-colors"><iconify-icon icon="simple-icons:instagram" width="13"></iconify-icon>Instagram</a></li>
+          <li><a href="#" class="flex items-center gap-2 text-sm text-[var(--muted)] hover:text-white transition-colors"><iconify-icon icon="simple-icons:pinterest" width="13"></iconify-icon>Pinterest</a></li>
+          <li><a href="#" class="flex items-center gap-2 text-sm text-[var(--muted)] hover:text-white transition-colors"><iconify-icon icon="simple-icons:houzz" width="13"></iconify-icon>Houzz</a></li>
+          <li><a href="#" class="flex items-center gap-2 text-sm text-[var(--muted)] hover:text-white transition-colors"><iconify-icon icon="simple-icons:linkedin" width="13"></iconify-icon>LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-[var(--border)]">
+      <p class="text-xs text-[var(--muted)]">© 2026 VANTA Studio LLC. All rights reserved.</p>
+      <div class="flex gap-6">
+        <a href="#" class="text-xs text-[var(--muted)] hover:text-white transition-colors">Privacy Policy</a>
+        <a href="#" class="text-xs text-[var(--muted)] hover:text-white transition-colors">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── Mobile menu ────────────────────────────── */
+  const toggle = document.getElementById('menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  toggle.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+  /* ── Nav scroll-state ───────────────────────── */
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+
+  /* ── Scroll reveal ──────────────────────────── */
+  const revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          entry.target.style.transitionDelay = (i % 4) * 80 + 'ms';
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+    revealEls.forEach(el => revealObserver.observe(el));
+  } else {
+    /* Fallback: make all reveal elements visible immediately */
+    revealEls.forEach(el => el.classList.add('visible'));
+  }
+
+  /* ══════════════════════════════════════════════
+     HERO SCROLL CANVAS ANIMATION
+  ══════════════════════════════════════════════ */
+  const TOTAL_FRAMES = 120;
+  const canvas  = document.getElementById('hero-canvas');
+  const ctx     = canvas.getContext('2d');
+  const loader  = document.getElementById('hero-loader');
+  const hud     = document.getElementById('frame-hud');
+  const scrollHint = document.getElementById('scroll-hint');
+  const section = document.getElementById('hero-scroll-section');
+
+  /* Build frame path list */
+  const frames = [];
+  for (let i = 1; i <= TOTAL_FRAMES; i++) {
+    frames.push(`./frames/frame_${String(i).padStart(3, '0')}.webp`);
+  }
+
+  /* Resize canvas to cover viewport */
+  function resizeCanvas() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas, { passive: true });
+
+  /* Draw a single image centred + cover-fit */
+  function drawFrame(img) {
+    if (!img || !img.complete || img.naturalWidth === 0) return;
+    const cw = canvas.width, ch = canvas.height;
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    const scale = Math.max(cw / iw, ch / ih);
+    const sw = iw * scale, sh = ih * scale;
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, (cw - sw) / 2, (ch - sh) / 2, sw, sh);
+  }
+
+  /* ── Preload frames ────────────────────────── */
+  const images = new Array(TOTAL_FRAMES).fill(null);
+  let loadedCount = 0;
+  let currentFrameIdx = 0;
+
+  function onFrameLoaded(idx) {
+    loadedCount++;
+    const pct = (loadedCount / TOTAL_FRAMES) * 100;
+    loader.style.width = pct + '%';
+
+    /* Draw first frame as soon as it's ready */
+    if (idx === 0) drawFrame(images[0]);
+
+    if (loadedCount === TOTAL_FRAMES) {
+      loader.style.opacity = '0';
+    }
+  }
+
+  frames.forEach((src, i) => {
+    const img = new Image();
+    img.onload  = () => onFrameLoaded(i);
+    img.onerror = () => onFrameLoaded(i); // still count, just skip draw
+    img.src = src;
+    images[i] = img;
+  });
+
+  /* ── Scroll → frame mapping ────────────────── */
+  let rafPending = false;
+  let targetFrame = 0;
+  let displayedFrame = 0;
+
+  function updateFrame() {
+    rafPending = false;
+
+    const sectionTop    = section.offsetTop;
+    const sectionHeight = section.offsetHeight;
+    const scrollY       = window.scrollY;
+
+    /* Progress 0 → 1 through the scroll section */
+    const raw = (scrollY - sectionTop) / (sectionHeight - window.innerHeight);
+    const progress = Math.min(1, Math.max(0, raw));
+
+    targetFrame = Math.round(progress * (TOTAL_FRAMES - 1));
+
+    /* Hide scroll hint once user starts scrolling */
+    if (progress > 0.02) {
+      scrollHint.classList.add('hidden');
+    } else {
+      scrollHint.classList.remove('hidden');
+    }
+
+    /* Only redraw if frame changed */
+    if (targetFrame !== displayedFrame) {
+      displayedFrame = targetFrame;
+      drawFrame(images[displayedFrame]);
+      hud.textContent = String(displayedFrame + 1).padStart(3, '0') + ' / ' + TOTAL_FRAMES;
+    }
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!rafPending) {
+      rafPending = true;
+      requestAnimationFrame(updateFrame);
+    }
+  }, { passive: true });
+
+  /* Initial draw */
+  updateFrame();
+
+})();
+</script>
+</body>
+</html>
